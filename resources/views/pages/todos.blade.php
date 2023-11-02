@@ -3,7 +3,12 @@
 use function Livewire\Volt\state;
 use App\Models\Todo;
 
-state(description: '', todos: fn() => Todo::all());
+state(
+    selected: '',
+    description: '',
+    todos: fn() => Todo::ByFilteredUncompleted()->get(),
+    todosDone: fn() => Todo::byFilteredCompleted()->get()
+);
 
 
 $addTodo = function () {
@@ -11,8 +16,49 @@ $addTodo = function () {
         ['description' => $this->description]
     );
     $this->description = '';
-    $this->todos = Todo::all();
+    $this->todos = Todo::byFilteredUncompleted()->get();
+};
+
+$deleter = function ($id) {
+    $removeItem = Todo::find($id);
+    $removeItem->delete();
+
+    $this->todos = Todo::byFilteredUncompleted()->get();
+    $this->todosDone = Todo::byFilteredCompleted()->get();
+
+};
+
+$completer = function ($id) {
+    $completedItem = Todo::find($id);
+
+    $completedItem->update(
+        [
+            "done" => true
+        ]
+    );
+
+    $this->todos = Todo::byFilteredUncompleted()->get();
+    $this->todosDone = Todo::byFilteredCompleted()->get();
+};
+
+$uncheck = function ($id) {
+
+    $completedItem = Todo::find($id);
+
+    $completedItem->update(
+        [
+            "done" => false
+        ]
+    );
+
+//    $item = Todo::find($id);
+//    $item->done = null;
+//    $item->save();
+
+    $this->todos = Todo::byFilteredUncompleted()->get();
+    $this->todosDone = Todo::byFilteredCompleted()->get();
 }
+
 
 ?>
 
@@ -32,11 +78,36 @@ $addTodo = function () {
     </form>
 
     <h1>Todos</h1>
-    <ul>
-        @foreach($todos as $todo)
-            <li>{{ $todo->description }}</li>
-        @endforeach
-    </ul>
+
+    @if(count($todos) === 0)
+        <div>
+            No todos ...
+        </div>
+    @else
+
+        <h2>Uncompleted Tasks</h2>
+            <ul>
+                @foreach($todos as $todo)
+                    <li>{{ $todo->description }}
+                        <button wire:click="deleter({{ $todo->id }})">Delete</button>
+
+                        <button wire:click="completer({{ $todo->id }})">Done</button>
+                    </li>
+
+                @endforeach
+            </ul>
+        <h2>Completed Tasks</h2>
+        <ol>
+            @foreach($todosDone as $todo)
+                <li>
+                    {{ $todo->description }}
+                    <button wire:click="deleter({{ $todo->id }})">Delete</button>
+                    <button wire:click="uncheck({{ $todo->id }})">Undone</button>
+                </li>
+            @endforeach
+
+        </ol>
+    @endif
 </div>
 @endvolt
 </body>
