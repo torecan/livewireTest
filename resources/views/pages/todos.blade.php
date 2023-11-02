@@ -64,7 +64,7 @@ $uncheck = function ($id) {
 //$search = fn($id) => $this->todos = Todo::SearchItem($id);
 $searcher = function () {
 
-    $this->todos = Todo::SearchItem($this->search)->get();
+    $this->todos = Todo::SearchItem($this->search);
 }
 
 ?>
