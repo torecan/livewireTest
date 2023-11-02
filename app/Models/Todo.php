@@ -36,4 +36,10 @@ class Todo extends Model
         return $query->where('done', 1);
     }
 
+    public function scopeSearchItem(Builder $query, $str) :Builder {
+
+        return $query->where('description', 'like',
+       "%$str%");
+    }
+
 }

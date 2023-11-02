@@ -4,12 +4,14 @@ use function Livewire\Volt\state;
 use App\Models\Todo;
 
 state(
-    selected: '',
     description: '',
     todos: fn() => Todo::ByFilteredUncompleted()->get(),
     todosDone: fn() => Todo::byFilteredCompleted()->get()
 );
 
+state(
+    search: ''
+)->url();
 
 $addTodo = function () {
     Todo::create(
@@ -57,8 +59,13 @@ $uncheck = function ($id) {
 
     $this->todos = Todo::byFilteredUncompleted()->get();
     $this->todosDone = Todo::byFilteredCompleted()->get();
-}
+};
 
+//$search = fn($id) => $this->todos = Todo::SearchItem($id);
+$searcher = function () {
+
+    $this->todos = Todo::SearchItem($this->search);
+}
 
 ?>
 
@@ -72,12 +79,18 @@ $uncheck = function ($id) {
 
     <h1>Add Todo</h1>
 
+    {{ $search }}
     <form wire:submit="addTodo">
         <input type="text" wire:model="description">
         <button type="submit">Add</button>
     </form>
 
     <h1>Todos</h1>
+
+    <form wire:submit="searcher">
+        <input type="text" wire:model="search">
+        <button type="submit">Search</button>
+    </form>
 
     @if(count($todos) === 0)
         <div>
